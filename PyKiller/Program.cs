@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
@@ -24,6 +25,12 @@ namespace PyKiller
         {
             Console.Write(DateTime.Now + "\t");
             Console.WriteLine(format, args);
+        }
+
+        static void WriteLine(string v)
+        {
+            Console.Write(DateTime.Now + "\t");
+            Console.WriteLine(v);
         }
 
         static void Main(string[] args)
@@ -132,9 +139,22 @@ namespace PyKiller
                 foreach (var p in ps)
                 {
                     var pid = p.Id;
-                    p.Kill();
+                    try
+                    {
+                        p.Kill();
+                    }
+                    catch (Win32Exception ex)
+                    {
+                        // This happens especailly when the process is being killed.
+                        WriteLine(ex.Message);
+                    }
+                    WriteLine("Killing PID = {0} .", pid);
+                }
+                // Wait for Exit
+                foreach (var p in ps)
+                {
+                    p.WaitForExit(5000);
                     p.Dispose();
-                    WriteLine("Killed PID = {0} .", pid);
                 }
             }
         }
